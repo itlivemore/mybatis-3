@@ -183,6 +183,7 @@ public class Configuration {
 		typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
 		typeAliasRegistry.registerAlias("MANAGED", ManagedTransactionFactory.class);
 
+		// 添加类的别名，比如下面的POOLED，创建数据源时如果为POOLED，就返回PooledDataSourceFactory
 		typeAliasRegistry.registerAlias("JNDI", JndiDataSourceFactory.class);
 		typeAliasRegistry.registerAlias("POOLED", PooledDataSourceFactory.class);
 		typeAliasRegistry.registerAlias("UNPOOLED", UnpooledDataSourceFactory.class);

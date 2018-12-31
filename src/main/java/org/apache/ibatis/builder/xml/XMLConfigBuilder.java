@@ -294,7 +294,7 @@ public class XMLConfigBuilder extends BaseBuilder {
 					// 创建事务工厂
 					TransactionFactory txFactory = transactionManagerElement(
 							child.evalNode("*[local-name()='transactionManager']"));
-					// 处理数据源
+					// 处理数据源,获取DataSourceFactory，数据源工厂,不同的类型会返回不同的数据源工厂
 					DataSourceFactory dsFactory = dataSourceElement(child.evalNode("*[local-name()='dataSource']"));
 					DataSource dataSource = dsFactory.getDataSource();
 					Environment.Builder environmentBuilder = new Environment.Builder(id).transactionFactory(txFactory)
@@ -338,6 +338,7 @@ public class XMLConfigBuilder extends BaseBuilder {
 
 	private DataSourceFactory dataSourceElement(XNode context) throws Exception {
 		if (context != null) {
+			// 数据源类型，有三种 UNPOOLED不使用连接池的数据源,POOLED使用连接池的数据源,JNDI使用JNDI实现的数据源
 			String type = context.getStringAttribute("type");
 			Properties props = context.getChildrenAsProperties();
 			DataSourceFactory factory = (DataSourceFactory) resolveClass(type).newInstance();
