@@ -116,7 +116,7 @@ public class XMLConfigBuilder extends BaseBuilder {
 			reflectorFactoryElement(root.evalNode("*[local-name()='reflectorFactory']"));
 			settingsElement(settings);
 			// read it after objectFactory and objectWrapperFactory issue #631
-			// 解析environments,数据库信息
+			// 解析environments,数据库信息,事务管理器
 			environmentsElement(root.evalNode("*[local-name()='environments']"));
 			databaseIdProviderElement(root.evalNode("*[local-name()='databaseIdProvider']"));
 			typeHandlerElement(root.evalNode("*[local-name()='typeHandlers']"));
@@ -327,6 +327,7 @@ public class XMLConfigBuilder extends BaseBuilder {
 
 	private TransactionFactory transactionManagerElement(XNode context) throws Exception {
 		if (context != null) {
+			// 获取事务管理器类型，type=”[JDBC|MANAGED]”
 			String type = context.getStringAttribute("type");
 			Properties props = context.getChildrenAsProperties();
 			TransactionFactory factory = (TransactionFactory) resolveClass(type).newInstance();

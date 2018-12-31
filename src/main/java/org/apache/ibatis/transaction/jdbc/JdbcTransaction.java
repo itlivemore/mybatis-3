@@ -40,10 +40,10 @@ public class JdbcTransaction implements Transaction {
 
 	private static final Log log = LogFactory.getLog(JdbcTransaction.class);
 
-	protected Connection connection;
-	protected DataSource dataSource;
-	protected TransactionIsolationLevel level;
-	protected boolean autoCommit;
+	protected Connection connection; // 数据库连接
+	protected DataSource dataSource; // 数据源
+	protected TransactionIsolationLevel level; // 隔离级别
+	protected boolean autoCommit; // 是否为自动提交
 
 	public JdbcTransaction(DataSource ds, TransactionIsolationLevel desiredLevel, boolean desiredAutoCommit) {
 		dataSource = ds;
@@ -64,6 +64,7 @@ public class JdbcTransaction implements Transaction {
 		return connection;
 	}
 
+	// 提交事务，直接用的connection.commit();直接使用jdbc里的事务提交
 	@Override
 	public void commit() throws SQLException {
 		if (connection != null && !connection.getAutoCommit()) {
@@ -74,6 +75,7 @@ public class JdbcTransaction implements Transaction {
 		}
 	}
 
+	// rollback直接使用jdbc里的
 	@Override
 	public void rollback() throws SQLException {
 		if (connection != null && !connection.getAutoCommit()) {
@@ -84,6 +86,7 @@ public class JdbcTransaction implements Transaction {
 		}
 	}
 
+	// 关闭是直接使用jdbc里的
 	@Override
 	public void close() throws SQLException {
 		if (connection != null) {

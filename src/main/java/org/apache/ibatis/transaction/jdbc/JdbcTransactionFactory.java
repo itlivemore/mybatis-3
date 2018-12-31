@@ -33,17 +33,19 @@ import org.apache.ibatis.transaction.TransactionFactory;
  */
 public class JdbcTransactionFactory implements TransactionFactory {
 
-  @Override
-  public void setProperties(Properties props) {
-  }
+	@Override
+	public void setProperties(Properties props) {
+	}
 
-  @Override
-  public Transaction newTransaction(Connection conn) {
-    return new JdbcTransaction(conn);
-  }
+	@Override
+	public Transaction newTransaction(Connection conn) {
+		// 根据给定的数据库连接创建Transaction
+		return new JdbcTransaction(conn);
+	}
 
-  @Override
-  public Transaction newTransaction(DataSource ds, TransactionIsolationLevel level, boolean autoCommit) {
-    return new JdbcTransaction(ds, level, autoCommit);
-  }
+	@Override
+	public Transaction newTransaction(DataSource ds, TransactionIsolationLevel level, boolean autoCommit) {
+		// 根据DataSource、隔离级别和是否自动提交创建Transacion
+		return new JdbcTransaction(ds, level, autoCommit);
+	}
 }
