@@ -113,6 +113,7 @@ public abstract class BaseExecutor implements Executor {
 		if (closed) {
 			throw new ExecutorException("Executor was closed.");
 		}
+		// 清除一级缓存
 		clearLocalCache();
 		return doUpdate(ms, parameter);
 	}
@@ -157,7 +158,7 @@ public abstract class BaseExecutor implements Executor {
 				// 从缓存中取到了结果
 				handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
 			} else {
-				// 缓存中没有值，直接从数据库中读取数据
+				// 缓存中没有值，从数据库中读取数据
 				list = queryFromDatabase(ms, parameter, rowBounds, resultHandler, key, boundSql);
 			}
 		} finally {
@@ -270,6 +271,7 @@ public abstract class BaseExecutor implements Executor {
 		}
 	}
 
+	// 清除一级缓存
 	@Override
 	public void clearLocalCache() {
 		if (!closed) {

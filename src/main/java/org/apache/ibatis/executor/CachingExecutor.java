@@ -72,6 +72,7 @@ public class CachingExecutor implements Executor {
 
 	@Override
 	public int update(MappedStatement ms, Object parameterObject) throws SQLException {
+		// 清除二级缓存
 		flushCacheIfRequired(ms);
 		return delegate.update(ms, parameterObject);
 	}
@@ -95,21 +96,24 @@ public class CachingExecutor implements Executor {
 	@Override
 	public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds,
 			ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
+		// 从MappedStatement拿二级缓存
 		Cache cache = ms.getCache();
 		if (cache != null) {
 			flushCacheIfRequired(ms);
 			if (ms.isUseCache() && resultHandler == null) {
 				ensureNoOutParams(ms, boundSql);
 				@SuppressWarnings("unchecked")
-				List<E> list = (List<E>) tcm.getObject(cache, key);
+				List<E> list = (List<E>) tcm.getObject(cache, key); // 从二级缓存中拿数据
 				if (list == null) {
+					// 二级缓存中没有数据，查数据库
 					list = delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
+					// 把查询结果放到二级缓存中
 					tcm.putObject(cache, key, list); // issue #578 and #116
 				}
 				return list;
 			}
 		}
-		// 查询数据库
+		// 查询数据库,这里的delegate默认是SimpleExecutor，SimpleExecutor没有Override父类BaseExecutor的query方法，因此最终执行了父类BaseExecutor的query方法。
 		return delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
 	}
 
@@ -121,6 +125,7 @@ public class CachingExecutor implements Executor {
 	@Override
 	public void commit(boolean required) throws SQLException {
 		delegate.commit(required);
+		// 添加到二级缓存中
 		tcm.commit();
 	}
 

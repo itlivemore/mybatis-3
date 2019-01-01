@@ -589,9 +589,11 @@ public class Configuration {
 		} else if (ExecutorType.REUSE == executorType) {
 			executor = new ReuseExecutor(this, transaction);
 		} else {
+			// 默认返回SimpleExecutor
 			executor = new SimpleExecutor(this, transaction);
 		}
 		if (cacheEnabled) {
+			// 如果开启一级缓存(默认是开启)，就再套一层，返回CachingExecutor
 			executor = new CachingExecutor(executor);
 		}
 		executor = (Executor) interceptorChain.pluginAll(executor);

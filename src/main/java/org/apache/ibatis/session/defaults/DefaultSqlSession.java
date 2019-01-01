@@ -188,6 +188,7 @@ public class DefaultSqlSession implements SqlSession {
 
 	@Override
 	public int insert(String statement, Object parameter) {
+		// insert方法实际还是调用update方法
 		return update(statement, parameter);
 	}
 
