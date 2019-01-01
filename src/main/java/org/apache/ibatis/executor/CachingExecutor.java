@@ -81,7 +81,7 @@ public class CachingExecutor implements Executor {
 			ResultHandler resultHandler) throws SQLException {
 		// 根据具体传入的参数，动态地生成需要执行的SQL语句，用BoundSql对象表示
 		BoundSql boundSql = ms.getBoundSql(parameterObject);
-		// 为当前的查询创建一个缓存Key
+		// 为当前的查询创建一个缓存Key，一级缓存中用到的key
 		CacheKey key = createCacheKey(ms, parameterObject, rowBounds, boundSql);
 		return query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
 	}

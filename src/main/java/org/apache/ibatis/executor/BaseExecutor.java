@@ -55,7 +55,7 @@ public abstract class BaseExecutor implements Executor {
 	protected Executor wrapper;
 
 	protected ConcurrentLinkedQueue<DeferredLoad> deferredLoads;
-	protected PerpetualCache localCache;
+	protected PerpetualCache localCache; // 本地缓存，一级缓存
 	protected PerpetualCache localOutputParameterCache;
 	protected Configuration configuration;
 
@@ -151,8 +151,10 @@ public abstract class BaseExecutor implements Executor {
 		List<E> list;
 		try {
 			queryStack++;
+			// 从缓存中读取结果
 			list = resultHandler == null ? (List<E>) localCache.getObject(key) : null;
 			if (list != null) {
+				// 从缓存中取到了结果
 				handleLocallyCachedOutputParameters(ms, key, parameter, boundSql);
 			} else {
 				// 缓存中没有值，直接从数据库中读取数据
@@ -196,11 +198,13 @@ public abstract class BaseExecutor implements Executor {
 		}
 	}
 
+	// 根据传入的信息构建CacheKey
 	@Override
 	public CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql) {
 		if (closed) {
 			throw new ExecutorException("Executor was closed.");
 		}
+		// key要同时由statemetid,rowBounds,sql,参数决定
 		CacheKey cacheKey = new CacheKey();
 		cacheKey.update(ms.getId());
 		cacheKey.update(rowBounds.getOffset());
@@ -209,6 +213,7 @@ public abstract class BaseExecutor implements Executor {
 		List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
 		TypeHandlerRegistry typeHandlerRegistry = ms.getConfiguration().getTypeHandlerRegistry();
 		// mimic DefaultParameterHandler logic
+		// 将每一个要传递给JDBC的参数值也更新到CacheKey中
 		for (ParameterMapping parameterMapping : parameterMappings) {
 			if (parameterMapping.getMode() != ParameterMode.OUT) {
 				Object value;
@@ -223,6 +228,7 @@ public abstract class BaseExecutor implements Executor {
 					MetaObject metaObject = configuration.newMetaObject(parameterObject);
 					value = metaObject.getValue(propertyName);
 				}
+				// 参数值更新到缓存key中
 				cacheKey.update(value);
 			}
 		}
@@ -328,6 +334,7 @@ public abstract class BaseExecutor implements Executor {
 	private <E> List<E> queryFromDatabase(MappedStatement ms, Object parameter, RowBounds rowBounds,
 			ResultHandler resultHandler, CacheKey key, BoundSql boundSql) throws SQLException {
 		List<E> list;
+		// 先在缓存中占个位
 		localCache.putObject(key, EXECUTION_PLACEHOLDER);
 		try {
 			// 调用派生类的doQuery方法
@@ -335,6 +342,7 @@ public abstract class BaseExecutor implements Executor {
 		} finally {
 			localCache.removeObject(key);
 		}
+		// 将查询结果放到缓存中
 		localCache.putObject(key, list);
 		if (ms.getStatementType() == StatementType.CALLABLE) {
 			localOutputParameterCache.putObject(key, parameter);
